@@ -1,10 +1,10 @@
-package tutotial1;
+package tutorial1;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.apache.kafka.common.protocol.types.Field;
+import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,11 +13,11 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.Properties;
 
-public class ConsumerDemo {
+public class ConsumerDemoAssugnSeek {
     public static void main(String[] args) {
-        Logger logger = LoggerFactory.getLogger(ConsumerDemo.class.getName());
+        Logger logger = LoggerFactory.getLogger(ConsumerDemoAssugnSeek.class.getName());
 
-        String groupId = "my_first_application";
+        String groupId = "my_third_application";
         String topic = "first_topic_name";
 
         // create consumer config
@@ -31,16 +31,34 @@ public class ConsumerDemo {
         // create consumer
         KafkaConsumer<String, String> consumer = new KafkaConsumer<String, String>(properties);
 
-        // subscribe consumer to topic(s) can subscribe to multiple topic using Arrays.asList("topic_1", "topic_2")
-        consumer.subscribe(Arrays.asList(topic));
+        // assign and seek are mostly used to replay data or fetch a specific message
+        // assign
+        long offsetToReadFrom = 5L;
+        TopicPartition partitionToReadFrom = new TopicPartition(topic, 0);
+
+        consumer.assign(Arrays.asList(partitionToReadFrom));
+
+        // seek
+        consumer.seek(partitionToReadFrom, offsetToReadFrom);
+
+        // read 5 messages
+        int numberOfMessagesToRead = 5;
+        int numberOfMessagesRead = 0;
+        boolean keepOnReading = true;
 
         // poll for new data
-        while (true) {
+        while (keepOnReading) {
             ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(100));
 
             for (ConsumerRecord<String, String> record : records) {
+                numberOfMessagesRead += 1;
                 logger.info("Key: " + record.key() + ", Value: " + record.value());
                 logger.info("Partition: " + record.partition() + ", Offset: " + record.offset());
+
+                if (numberOfMessagesRead >= numberOfMessagesToRead) {
+                    keepOnReading = false;
+                    break;
+                }
             }
         }
     }

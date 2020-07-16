@@ -1,4 +1,4 @@
-package tutotial1;
+package tutorial1;
 
 import org.apache.kafka.clients.producer.*;
 import org.apache.kafka.common.serialization.StringSerializer;
@@ -7,9 +7,9 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Properties;
 
-public class ProducerDemoWithKeys {
+public class ProducerDemoWithCallback {
     public static void main(String[] args) {
-        final Logger logger = LoggerFactory.getLogger(ProducerDemoWithKeys.class);
+        final Logger logger = LoggerFactory.getLogger(ProducerDemoWithCallback.class);
 
         // Create producer properties
         Properties properties = new Properties();
@@ -22,7 +22,7 @@ public class ProducerDemoWithKeys {
 
         // Send data - asynchronous
         for (int i = 0; i < 10; i++) {
-            final ProducerRecord<String, String> record = new ProducerRecord<String, String>("first_topic_name", "id_" + i, "hello world " + i);
+            final ProducerRecord<String, String> record = new ProducerRecord<String, String>("first_topic_name", "hello world " + i);
             producer.send(record, new Callback() {
                 public void onCompletion(RecordMetadata recordMetadata, Exception e) {
                     if (e == null) {
